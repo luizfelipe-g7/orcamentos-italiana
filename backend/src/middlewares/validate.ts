@@ -47,7 +47,7 @@ export function validateMultiple(schemas: {
 
       try {
         const data = schema.parse(req[target as keyof typeof req]);
-        (req as Record<string, unknown>)[target] = data;
+        (req as unknown as Record<string, unknown>)[target] = data;
       } catch (error) {
         if (error instanceof ZodError) {
           error.errors.forEach((err) => {

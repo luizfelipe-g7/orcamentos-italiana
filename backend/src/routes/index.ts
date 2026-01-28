@@ -1,20 +1,18 @@
 import { Router } from 'express';
-
-// Importar rotas dos módulos aqui
-// import authRoutes from './authRoutes';
-// import orcamentoRoutes from './orcamentoRoutes';
-// import membroRoutes from './membroRoutes';
-// import documentoRoutes from './documentoRoutes';
-// import financeiroRoutes from './financeiroRoutes';
+import authRoutes from './authRoutes';
+import orcamentoRoutes from './orcamentoRoutes';
+import membroRoutes from './membroRoutes';
+import documentoRoutes from './documentoRoutes';
+import financeiroRoutes from './financeiroRoutes';
 
 const router = Router();
 
 // Registrar rotas
-// router.use('/auth', authRoutes);
-// router.use('/orcamentos', orcamentoRoutes);
-// router.use('/membros', membroRoutes);
-// router.use('/documentos', documentoRoutes);
-// router.use('/financeiro', financeiroRoutes);
+router.use('/auth', authRoutes);
+router.use('/orcamentos', orcamentoRoutes);
+router.use('/membros', membroRoutes);
+router.use('/documentos', documentoRoutes);
+router.use('/financeiro', financeiroRoutes);
 
 // Rota de teste
 router.get('/', (_req, res) => {

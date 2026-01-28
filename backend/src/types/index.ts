@@ -120,10 +120,17 @@ export interface Documento {
   id: number;
   membro_id: number;
   tipo: string;
+  subtipo?: string;
   nome_arquivo: string;
+  nome_original: string;
   url_s3: string;
+  mime_type?: string;
+  tamanho_bytes?: number;
   status: DocumentoStatus;
   observacoes?: string;
+  uploaded_by?: number;
+  data_emissao?: Date;
+  data_validade?: Date;
   created_at: Date;
   updated_at: Date;
 }
