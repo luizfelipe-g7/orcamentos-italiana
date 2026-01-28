@@ -5,7 +5,7 @@ export const db = knex({
   client: 'pg',
   connection: {
     connectionString: env.DATABASE_URL,
-    ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false }, // Supabase requer SSL
   },
   pool: {
     min: 2,

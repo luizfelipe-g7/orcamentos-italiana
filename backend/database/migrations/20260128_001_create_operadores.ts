@@ -11,8 +11,7 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamps(true, true); // created_at e updated_at
   });
 
-  // Índices
-  await knex.schema.raw('CREATE INDEX idx_operadores_email ON operadores(email)');
+  // Índice para busca por status ativo (email já tem índice pelo unique)
   await knex.schema.raw('CREATE INDEX idx_operadores_ativo ON operadores(ativo)');
 }
 

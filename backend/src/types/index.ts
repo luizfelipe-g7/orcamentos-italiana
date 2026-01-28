@@ -25,7 +25,33 @@ export type CidadaniaType = 'IT' | 'PT';
 export type OrcamentoStatus = 'ABERTO' | 'FECHADO' | 'CANCELADO' | 'EM_ANDAMENTO';
 
 // Status de documento
-export type DocumentoStatus = 'PENDENTE' | 'ENVIADO' | 'APROVADO' | 'REJEITADO';
+export type DocumentoStatus = 'PENDENTE' | 'ENVIADO' | 'EM_ANALISE' | 'APROVADO' | 'REJEITADO' | 'VENCIDO';
+
+// Status de assinatura digital
+export type AssinaturaStatus = 'NAO_REQUER' | 'PENDENTE' | 'ENVIADO' | 'ASSINADO' | 'RECUSADO';
+
+// Status de parcela
+export type ParcelaStatus = 'PENDENTE' | 'PAGO' | 'ATRASADO' | 'CANCELADO';
+
+// Tipo de processo de cidadania
+export type ProcessoTipo = 'JUDICIAL' | 'ADMINISTRATIVO' | 'CONSULADO';
+
+// Status do processo de cidadania
+export type ProcessoStatus = 
+  | 'AGUARDANDO_DOCUMENTOS'
+  | 'DOCUMENTOS_EM_ANALISE'
+  | 'AGUARDANDO_TRADUCAO'
+  | 'AGUARDANDO_APOSTILAMENTO'
+  | 'PRONTO_PARA_PROTOCOLO'
+  | 'PROTOCOLADO'
+  | 'EM_ANALISE_CONSULADO'
+  | 'EM_ANALISE_TRIBUNAL'
+  | 'AGUARDANDO_SENTENCA'
+  | 'SENTENCA_FAVORAVEL'
+  | 'SENTENCA_DESFAVORAVEL'
+  | 'CIDADANIA_RECONHECIDA'
+  | 'CONCLUIDO'
+  | 'CANCELADO';
 
 // Resposta padrão da API
 export interface ApiResponse<T = unknown> {

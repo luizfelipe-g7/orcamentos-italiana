@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS operadores (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_operadores_email ON operadores(email);
+-- Índice para busca por status ativo (email já tem índice pelo UNIQUE)
 CREATE INDEX idx_operadores_ativo ON operadores(ativo);
 
 -- ============================================
