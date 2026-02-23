@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
+import { MulterError } from 'multer';
 import { logger } from '../utils/logger';
 import { AppError, ValidationError } from '../utils/errors';
 import { env } from '../config/env';
@@ -50,6 +51,20 @@ export function errorHandler(
       success: false,
       error: error.message,
       details: error.errors,
+    });
+    return;
+  }
+
+  // Erro de upload (multer)
+  if (error instanceof MulterError) {
+    const message =
+      error.code === 'LIMIT_FILE_SIZE'
+        ? 'Arquivo muito grande. Tamanho máximo permitido: 5MB.'
+        : error.message;
+
+    res.status(400).json({
+      success: false,
+      error: message,
     });
     return;
   }

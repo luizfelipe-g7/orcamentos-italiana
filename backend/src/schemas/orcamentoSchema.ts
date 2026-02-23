@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const createOrcamentoSchema = z.object({
   nome_familia: z.string().min(2, 'Nome da família deve ter no mínimo 2 caracteres'),
-  cidadania: z.enum(['IT', 'PT'], {
-    errorMap: () => ({ message: 'Cidadania deve ser IT ou PT' }),
+  cidadania: z.enum(['IT'], {
+    errorMap: () => ({ message: 'Cidadania deve ser IT' }),
   }),
   observacoes: z.string().optional(),
   // Campos financeiros iniciais opcionais

@@ -15,6 +15,16 @@ export const membroController = {
     });
   },
 
+  async listarTodos(req: Request, res: Response) {
+    const { user } = req as AuthenticatedRequest;
+    const membros = await membroService.listarTodos(user.id, user.role);
+
+    res.json({
+      success: true,
+      data: membros,
+    });
+  },
+
   async buscarPorId(req: Request, res: Response) {
     const { user } = req as AuthenticatedRequest;
     const { id } = req.params;

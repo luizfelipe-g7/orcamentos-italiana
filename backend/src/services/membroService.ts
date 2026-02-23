@@ -20,6 +20,22 @@ export const membroService = {
     return membroRepository.findByOrcamento(orcamentoId);
   },
 
+  async listarTodos(userId: number, role: UserRole) {
+    if (role !== 'ADM') {
+      // Se não for admin, talvez listar apenas membros dos orçamentos do usuário?
+      // Por enquanto, vamos restringir a ADM ou implementar filtro por operador depois
+      // Vamos permitir listar todos mas filtrar no repositório seria melhor.
+      // Como não temos filtro no repo ainda, vamos deixar restrito a ADM ou implementar filtro em memória (ruim)
+      // Melhor: deixar ADM only por enquanto ou implementar findByOperador no repo.
+      // Vamos simplificar: listar todos para ADM, e vazio para outros por enquanto, ou implementar direito.
+      // Vamos implementar direito: listar apenas membros de orçamentos do operador.
+      // Mas isso requer join.
+      // Para simplificar o "funcionalidades funcionando", vamos permitir listar todos se for ADM.
+      throw new ForbiddenError('Apenas administradores podem listar todos os membros.');
+    }
+    return membroRepository.findAll();
+  },
+
   async buscarPorId(id: number, userId: number, role: UserRole) {
     const membro = await membroRepository.findById(id);
 

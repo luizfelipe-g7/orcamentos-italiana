@@ -19,7 +19,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 // Tipos de cidadania
-export type CidadaniaType = 'IT' | 'PT';
+export type CidadaniaType = 'IT';
 
 // Status de orçamento
 export type OrcamentoStatus = 'ABERTO' | 'FECHADO' | 'CANCELADO' | 'EM_ANDAMENTO';
@@ -85,6 +85,7 @@ export interface Operador {
   senha: string;
   role: UserRole;
   ativo: boolean;
+  foto_url?: string | null;
   created_at: Date;
   updated_at: Date;
 }
