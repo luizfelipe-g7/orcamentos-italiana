@@ -19,6 +19,7 @@ router.use(authMiddleware);
 router.post('/upload', upload.single('arquivo'), documentoController.upload);
 
 router.get('/membro/:membroId', documentoController.listarPorMembro);
+router.put('/:id/status', documentoController.atualizarStatus);
 router.delete('/:id', documentoController.excluir);
 
 export default router;

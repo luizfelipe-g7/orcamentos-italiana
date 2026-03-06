@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '../components/layout/Header';
-import { Users, Search, UserPlus } from 'lucide-react';
+import { Users, Search, UserPlus, X } from 'lucide-react';
 import api from '../services/api';
 import axios from 'axios';
 
@@ -16,12 +16,22 @@ interface Membro {
 
 export function Membros() {
   const [membros, setMembros] = useState<Membro[]>([]);
+  const [orcamentos, setOrcamentos] = useState<Array<{ id: number; nome_familia: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    orcamento_id: '',
+    nome: '',
+    email: '',
+    telefone: '',
+    parentesco: '',
+  });
 
   useEffect(() => {
     loadMembros();
+    loadOrcamentos();
   }, []);
 
   const loadMembros = async () => {
@@ -37,23 +47,29 @@ export function Membros() {
     }
   };
 
+  const loadOrcamentos = async () => {
+    try {
+      const response = await api.get('/orcamentos?limit=200&page=1');
+      const list = Array.isArray(response.data?.data) ? response.data.data : [];
+      setOrcamentos(list.map((o: any) => ({ id: o.id, nome_familia: o.nome_familia || `Orçamento #${o.id}` })));
+    } catch (error) {
+      console.error('Erro ao carregar orçamentos para o formulário:', error);
+    }
+  };
+
   const filteredMembros = membros.filter(membro => 
     membro.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (membro.email && membro.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleNovoMembro = async () => {
-    const orcamentoId = window.prompt('ID do orçamento:');
-    if (!orcamentoId) return;
-    const nome = window.prompt('Nome do membro:');
-    if (!nome) return;
-    const email = (window.prompt('Email (opcional):') || '').trim();
-    const telefone = (window.prompt('Telefone (opcional):') || '').trim();
-    const parentesco = (window.prompt('Parentesco (opcional):') || '').trim();
-
-    const idNum = Number(orcamentoId);
+    const idNum = Number(form.orcamento_id);
     if (!Number.isFinite(idNum) || idNum <= 0) {
       alert('ID do orçamento inválido.');
+      return;
+    }
+    if (!form.nome.trim()) {
+      alert('Nome do membro é obrigatório.');
       return;
     }
 
@@ -61,16 +77,18 @@ export function Membros() {
       setCreating(true);
       const payload: Record<string, unknown> = {
         orcamento_id: idNum,
-        nome,
+        nome: form.nome.trim(),
       };
 
       // Envia apenas campos opcionais preenchidos para evitar erro em bases com schema antigo.
-      if (email) payload.email = email;
-      if (telefone) payload.telefone = telefone;
-      if (parentesco) payload.parentesco = parentesco;
+      if (form.email.trim()) payload.email = form.email.trim();
+      if (form.telefone.trim()) payload.telefone = form.telefone.trim();
+      if (form.parentesco.trim()) payload.parentesco = form.parentesco.trim();
 
       await api.post('/membros', payload);
       await loadMembros();
+      setShowModal(false);
+      setForm({ orcamento_id: '', nome: '', email: '', telefone: '', parentesco: '' });
       alert('Membro criado com sucesso.');
     } catch (error) {
       console.error('Erro ao criar membro:', error);
@@ -101,7 +119,7 @@ export function Membros() {
           </div>
 
           <button
-            onClick={handleNovoMembro}
+            onClick={() => setShowModal(true)}
             disabled={creating}
             className="flex items-center gap-2 px-5 py-2.5 bg-[#003366] text-white rounded-lg hover:bg-[#004080] transition-all shadow-md hover:shadow-lg disabled:opacity-60"
           >
@@ -153,6 +171,85 @@ export function Membros() {
           </div>
         )}
       </main>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-xl border border-gray-200 shadow-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-800">Novo Membro</h3>
+              <button onClick={() => setShowModal(false)} className="p-2 rounded hover:bg-gray-100">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Orçamento</label>
+                <select
+                  value={form.orcamento_id}
+                  onChange={(e) => setForm((prev) => ({ ...prev, orcamento_id: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
+                >
+                  <option value="">Selecione um orçamento</option>
+                  {orcamentos.map((o) => (
+                    <option key={o.id} value={o.id}>{o.nome_familia} (#{o.id})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <input
+                  value={form.nome}
+                  onChange={(e) => setForm((prev) => ({ ...prev, nome: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Parentesco</label>
+                <input
+                  value={form.parentesco}
+                  onChange={(e) => setForm((prev) => ({ ...prev, parentesco: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input
+                  value={form.telefone}
+                  onChange={(e) => setForm((prev) => ({ ...prev, telefone: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleNovoMembro}
+                disabled={creating}
+                className="px-4 py-2 rounded-lg bg-[#003366] text-white hover:bg-[#004080] disabled:opacity-60"
+              >
+                {creating ? 'Salvando...' : 'Salvar Membro'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

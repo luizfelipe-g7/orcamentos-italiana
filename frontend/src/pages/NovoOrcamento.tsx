@@ -99,17 +99,42 @@ export function NovoOrcamento() {
     try {
       setSaving(true);
       
+      const valorTotalCalculado = Number(financialInfo.valorFinal);
+      const parcelasCalculadas = Number(financialInfo.parcelas);
+
       // 1. Criar o Orçamento
-      const budgetData = {
-        nome_familia: nomeFamilia,
+      const nomeFamiliaLimpo = nomeFamilia.trim();
+      const totalRequerentes = requerentes.reduce((acc, r) => acc + r.quantidade, 0);
+      const totalEstimado = Number(financialInfo.valorFinal || 0);
+      const observacoesResumo = [
+        'Orçamento gerado via assistente.',
+        `Grau de parentesco base: ${grauParentesco}.`,
+        `Quantidade de requerentes: ${totalRequerentes}.`,
+        totalEstimado > 0
+          ? `Valor estimado inicial: R$ ${totalEstimado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`
+          : undefined,
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      const budgetData: Record<string, unknown> = {
+        nome_familia: nomeFamiliaLimpo,
         cidadania: 'IT', // Por enquanto fixo IT, mas poderia vir de um seletor
-        valor_total: financialInfo.valorFinal,
-        num_parcelas: financialInfo.parcelas,
-        observacoes: `Orçamento gerado via assistente. 
-        Grau: ${grauParentesco}. 
-        Requerentes: ${requerentes.reduce((acc, r) => acc + r.quantidade, 0)}.
-        Detalhes: ${JSON.stringify(detalhesOrcamento)}`
+        observacoes: observacoesResumo
       };
+
+      // Campos opcionais no backend: só envia se forem válidos
+      if (Number.isFinite(valorTotalCalculado) && valorTotalCalculado > 0) {
+        budgetData.valor_total = valorTotalCalculado;
+      }
+
+      if (
+        Number.isInteger(parcelasCalculadas) &&
+        parcelasCalculadas >= 1 &&
+        parcelasCalculadas <= 24
+      ) {
+        budgetData.num_parcelas = parcelasCalculadas;
+      }
 
       const created = await budgetService.create(budgetData);
       const orcamentoId = created?.data?.id;
@@ -155,9 +180,14 @@ export function NovoOrcamento() {
       
       alert('Orçamento salvo com sucesso!');
       navigate('/orcamentos');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar orçamento:', error);
-      alert('Erro ao salvar orçamento. Tente novamente.');
+      const details = error?.response?.data?.details;
+      const firstField = details && typeof details === 'object' ? Object.keys(details)[0] : '';
+      const firstDetailMessage =
+        firstField && Array.isArray(details[firstField]) ? details[firstField][0] : undefined;
+      const backendMessage = error?.response?.data?.error || firstDetailMessage;
+      alert(backendMessage ? `Erro ao salvar orçamento: ${backendMessage}` : 'Erro ao salvar orçamento. Tente novamente.');
     } finally {
       setSaving(false);
     }

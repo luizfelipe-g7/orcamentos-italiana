@@ -3,7 +3,7 @@ import { documentoService } from '../services/documentoService';
 import { AuthenticatedRequest } from '../types';
 import { UploadedFile } from '../services/uploadService';
 
-import { createDocumentoSchema } from '../schemas/documentoSchema';
+import { createDocumentoSchema, updateDocumentoStatusSchema } from '../schemas/documentoSchema';
 
 export const documentoController = {
   async upload(req: Request, res: Response) {
@@ -40,5 +40,18 @@ export const documentoController = {
     await documentoService.excluir(Number(id), user.id, user.role);
 
     res.status(204).send();
+  },
+
+  async atualizarStatus(req: Request, res: Response) {
+    const { user } = req as AuthenticatedRequest;
+    const { id } = req.params;
+    const data = updateDocumentoStatusSchema.parse(req.body);
+
+    const documento = await documentoService.atualizarStatus(Number(id), data, user.id, user.role);
+
+    res.json({
+      success: true,
+      data: documento,
+    });
   },
 };

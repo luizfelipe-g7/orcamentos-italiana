@@ -20,10 +20,6 @@ export function Orcamentos() {
   const [budgets, setBudgets] = useState<BudgetSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [editingBudget, setEditingBudget] = useState<BudgetSummary | null>(null);
-  const [editName, setEditName] = useState('');
-  const [editStatus, setEditStatus] = useState('ABERTO');
-  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     loadBudgets();
@@ -46,41 +42,6 @@ export function Orcamentos() {
                           (budget.clientName && budget.clientName.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
-
-  const openEditModal = (budget: BudgetSummary) => {
-    setEditingBudget(budget);
-    setEditName(budget.service);
-    setEditStatus((budget.status || 'ABERTO').toUpperCase());
-  };
-
-  const closeEditModal = () => {
-    setEditingBudget(null);
-    setEditName('');
-    setEditStatus('ABERTO');
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingBudget) return;
-    if (!editName.trim()) {
-      alert('Informe o nome da família.');
-      return;
-    }
-
-    try {
-      setSavingEdit(true);
-      await budgetService.update(editingBudget.id, {
-        nome_familia: editName.trim(),
-        status: editStatus,
-      });
-      await loadBudgets();
-      closeEditModal();
-    } catch (error) {
-      console.error('Erro ao atualizar orçamento:', error);
-      alert('Erro ao atualizar orçamento.');
-    } finally {
-      setSavingEdit(false);
-    }
-  };
 
   const handleDelete = async (budget: BudgetSummary) => {
     const confirmed = window.confirm(`Deseja excluir o orçamento da família ${budget.service}?`);
@@ -213,9 +174,9 @@ export function Orcamentos() {
 
                   <div className="flex items-center gap-2 self-end md:self-center">
                     <button
-                      onClick={() => openEditModal(budget)}
+                      onClick={() => navigate(`/orcamentos/${budget.id}`)}
                       className="p-2 text-gray-400 hover:text-[#003366] hover:bg-blue-50 rounded-lg transition-colors"
-                      title="Editar"
+                      title="Detalhes / Editar"
                     >
                       <Edit size={18} />
                     </button>
@@ -241,51 +202,6 @@ export function Orcamentos() {
         )}
       </main>
 
-      {editingBudget && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-xl shadow-xl border border-gray-200 p-5">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">Editar Orçamento</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Família</label>
-                <input
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
-                >
-                  <option value="ABERTO">ABERTO</option>
-                  <option value="EM_ANDAMENTO">EM_ANDAMENTO</option>
-                  <option value="FECHADO">FECHADO</option>
-                  <option value="CANCELADO">CANCELADO</option>
-                </select>
-              </div>
-            </div>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                onClick={closeEditModal}
-                className="px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                disabled={savingEdit}
-                className="px-4 py-2 rounded-lg bg-[#003366] text-white hover:bg-[#004080] disabled:opacity-60"
-              >
-                {savingEdit ? 'Salvando...' : 'Salvar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

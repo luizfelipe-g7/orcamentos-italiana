@@ -4,6 +4,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Orcamentos } from './pages/Orcamentos';
 import { NovoOrcamento } from './pages/NovoOrcamento';
+import { OrcamentoDetalhe } from './pages/OrcamentoDetalhe';
 import { Membros } from './pages/Membros';
 import { Configuracoes } from './pages/Configuracoes';
 import { Layout } from './components/layout/Layout';
@@ -37,6 +38,7 @@ function AppContent() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/orcamentos" element={<Orcamentos />} />
         <Route path="/orcamentos/novo" element={<NovoOrcamento />} />
+        <Route path="/orcamentos/:id" element={<OrcamentoDetalhe />} />
         <Route path="/membros" element={<Membros />} />
         <Route path="/configuracoes" element={<Configuracoes />} />
       </Route>

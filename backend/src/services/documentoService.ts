@@ -2,7 +2,7 @@ import { documentoRepository } from '../repositories/documentoRepository';
 import { membroRepository } from '../repositories/membroRepository';
 import { orcamentoRepository } from '../repositories/orcamentoRepository';
 import { uploadService, UploadedFile } from './uploadService';
-import { CreateDocumentoInput } from '../schemas/documentoSchema';
+import { CreateDocumentoInput, UpdateDocumentoStatusInput } from '../schemas/documentoSchema';
 import { NotFoundError, ForbiddenError, BadRequestError } from '../utils/errors';
 import { UserRole } from '../types';
 
@@ -75,5 +75,20 @@ export const documentoService = {
 
     // TODO: Deletar do S3 também (futuro)
     return documentoRepository.delete(id);
+  },
+
+  async atualizarStatus(id: number, data: UpdateDocumentoStatusInput, userId: number, role: UserRole) {
+    const documento = await documentoRepository.findById(id);
+    if (!documento) throw new NotFoundError('Documento não encontrado');
+
+    const membro = await membroRepository.findById(documento.membro_id);
+    if (!membro) throw new NotFoundError('Membro não encontrado');
+
+    const orcamento = await orcamentoRepository.findById(membro.orcamento_id);
+    if (role !== 'ADM' && orcamento?.operador_id !== userId) {
+      throw new ForbiddenError('Sem permissão');
+    }
+
+    return documentoRepository.updateStatus(id, data.status, data.observacoes);
   },
 };
